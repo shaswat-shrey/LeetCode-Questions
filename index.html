@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Course registration</title>
+<style>
+  :root{
+    --ink:#16283c; --ink-soft:#5a6b7d; --line:#d5dde5;
+    --bg:#eef1f4; --card:#ffffff; --accent:#0f6b5c; --bad:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.5 "Segoe UI",system-ui,sans-serif;
+    display:flex; justify-content:center; padding:40px 16px;
+  }
+  .card{background:var(--card); width:100%; max-width:640px; padding:36px 40px; border:1px solid var(--line)}
+  h1{margin:0 0 4px; font-size:26px; font-weight:600; letter-spacing:-.01em}
+  .sub{margin:0 0 28px; color:var(--ink-soft); font-size:14px}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  .full{grid-column:1/-1}
+  label{display:block; font-size:13px; margin-bottom:6px; color:var(--ink-soft)}
+  input,select{
+    width:100%; padding:10px 12px; font:inherit; color:var(--ink);
+    background:#fbfcfd; border:1px solid var(--line); border-radius:3px; outline:none;
+  }
+  input:focus,select:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(15,107,92,.15)}
+  .err input,.err select{border-color:var(--bad); background:#fdf6f5}
+  .msg{display:none; color:var(--bad); font-size:12.5px; margin-top:5px}
+  .err .msg{display:block}
+  .hint{font-size:12.5px; color:var(--ink-soft); margin-top:5px}
+  .terms{display:flex; gap:10px; align-items:flex-start; margin-top:26px; font-size:14px}
+  .terms input{width:auto; margin-top:3px}
+  button{
+    margin-top:24px; width:100%; padding:12px; font:inherit; font-weight:600;
+    color:#fff; background:var(--accent); border:0; border-radius:3px; cursor:pointer;
+  }
+  button:hover{background:#0c584c}
+  .ok{display:none; margin-top:20px; padding:12px 14px; background:#e7f2ef;
+      border-left:3px solid var(--accent); font-size:14px}
+</style>
+</head>
+<body>
+<form class="card" id="form" novalidate>
+  <h1>Course registration</h1>
+  <p class="sub">Fill in your details to enrol for the semester.</p>
+
+  <div class="grid">
+    <div class="full" data-field>
+      <label for="name">Student name</label>
+      <input id="name" type="text" autocomplete="name">
+      <p class="msg"></p>
+    </div>
+
+    <div data-field>
+      <label for="roll">Roll number</label>
+      <input id="roll" type="text">
+      <p class="msg"></p>
+    </div>
+
+    <div data-field>
+      <label for="mobile">Mobile number</label>
+      <input id="mobile" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digits">
+      <p class="msg"></p>
+    </div>
+
+    <div class="full" data-field>
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="you@college.edu">
+      <p class="msg"></p>
+    </div>
+
+    <div class="full" data-field>
+      <label for="course">Course</label>
+      <select id="course">
+        <option value="">Select a course</option>
+        <option>Data Structures and Algorithms</option>
+        <option>Machine Learning</option>
+        <option>Digital VLSI Design</option>
+        <option>Thermodynamics</option>
+        <option>Web Development</option>
+      </select>
+      <p class="msg"></p>
+    </div>
+
+    <div data-field>
+      <label for="pwd">Password</label>
+      <input id="pwd" type="password">
+      <p class="hint">8+ characters, one uppercase, one number, one symbol.</p>
+      <p class="msg"></p>
+    </div>
+
+    <div data-field>
+      <label for="cpwd">Confirm password</label>
+      <input id="cpwd" type="password">
+      <p class="msg"></p>
+    </div>
+  </div>
+
+  <label class="terms" data-field>
+    <input id="terms" type="checkbox">
+    <span>I accept the terms and conditions.<p class="msg"></p></span>
+  </label>
+
+  <button type="submit">Register</button>
+  <p class="ok" id="ok">Registered. A confirmation has been sent to your email.</p>
+</form>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const rules = {
+  name:   v => /^[A-Za-z][A-Za-z .]{1,49}$/.test(v.trim())   || "Enter your full name (letters only).",
+  roll:   v => /^[A-Za-z0-9]{4,15}$/.test(v.trim())          || "Enter a valid roll number.",
+  mobile: v => /^[0-9]{10}$/.test(v.trim())                  || "Mobile number must be exactly 10 digits.",
+  email:  v => /^[^\s@]+@[^\s@.]+\.[A-Za-z]{2,}$/.test(v.trim()) || "Enter an email with @ and a domain, e.g. you@college.edu.",
+  course: v => v !== ""                                      || "Choose a course.",
+  pwd:    v => (v.length >= 8 && /[A-Z]/.test(v) && /[0-9]/.test(v) && /[^A-Za-z0-9]/.test(v))
+                                                             || "Needs 8+ characters with an uppercase letter, a number and a symbol.",
+  cpwd:   v => (v !== "" && v === $("pwd").value)            || "Passwords do not match.",
+  terms:  () => $("terms").checked                           || "Accept the terms to continue."
+};
+
+function check(id){
+  const el = $(id), box = el.closest("[data-field]");
+  const res = rules[id](el.type === "checkbox" ? "" : el.value);
+  box.classList.toggle("err", res !== true);
+  box.querySelector(".msg").textContent = res === true ? "" : res;
+  return res === true;
+}
+
+Object.keys(rules).forEach(id => {
+  const el = $(id);
+  el.addEventListener("blur", () => check(id));
+  el.addEventListener("input", () => { if (el.closest("[data-field]").classList.contains("err")) check(id); });
+  el.addEventListener("change", () => check(id));
+});
+
+$("mobile").addEventListener("input", e => e.target.value = e.target.value.replace(/\D/g, ""));
+
+$("form").addEventListener("submit", e => {
+  e.preventDefault();
+  const valid = Object.keys(rules).map(check).every(Boolean);
+  $("ok").style.display = valid ? "block" : "none";
+  if (!valid) document.querySelector(".err input, .err select")?.focus();
+  else console.log({
+    name: $("name").value.trim(), roll: $("roll").value.trim(),
+    email: $("email").value.trim(), mobile: $("mobile").value,
+    course: $("course").value
+  });
+});
+</script>
+</body>
+</html>

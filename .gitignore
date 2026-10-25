@@ -1,0 +1,19 @@
+# Java compiled files
+*.class
+
+# Build output
+target/
+build/
+out/
+
+# Environment and secrets
+.env
+.env.*
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# OS files
+.DS_Store
